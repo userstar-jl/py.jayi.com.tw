@@ -125,7 +125,17 @@ try:
         # '%.2f' % => 除法保留兩位小數點的方法 (ref.https://blog.csdn.net/chenmozhe22/article/details/81666831)
         # print('{code}!"{name}"!22!{y}!{u}!{w}!{open}!{highest}!{lowest}!{BuyPrice}!{SellPrice}!{b}!{v}!13!14!15!{c1}!17!18!{c2}!20!21!22!23!{BuyV}!{SellV}'.format(b=row['z'],code=row['c'], name=row['n'], open=row['o'], highest=row['h'], lowest=row['l'], v=row['v'], y=row['y'], w=row['w'], u=row['u'], c1=PriceFluctuation, c2= PriceFluctuationPercent, SellPrice=SellPrice, BuyPrice=BuyPrice, BuyV=BuyV, SellV=SellV))
         result+='{code}!"{name}"!22!{y}!{u}!{w}!{open}!{highest}!{lowest}!{BuyPrice}!{SellPrice}!{b}!{v}!13!14!15!{c1}!17!18!{c2}!20!21!22!23!{BuyV}!{SellV}\n'.format(b=CurrentPrice,code=row['c'], name=row['n'], open=row['o'], highest=row['h'], lowest=row['l'], v=row['v'], y=row['y'], w=row['w'], u=row['u'], c1=PriceFluctuation, c2= PriceFluctuationPercent, SellPrice=SellPrice, BuyPrice=BuyPrice, BuyV=BuyV, SellV=SellV)
-        sotcksData.append({"code":row['c'], "name":row['n'], "price":CurrentPrice, "pfp":PriceFluctuationPercent})
+        sotcksData.append({
+            "code":row['c'], 
+            "name":row['n'], 
+            "price":CurrentPrice, 
+            "o":row['o'], 
+            "h":row['h'], 
+            "l":row['l'], 
+            "v":row['v'], 
+            "y":row['y'], 
+            "z":row['z'], 
+            "pfp":PriceFluctuationPercent})
     # 發起 exceptions for Debug
     # raise 
     # print(result, end ="") # Print without newline in Python 3.x
@@ -137,7 +147,17 @@ try:
     diff_ids = list(set(targets) - set(res_ids))
     if len(diff_ids) > 0:
         for id in diff_ids:
-            sotcksData.append({"code":id, "name":"--", "price":0, "pfp":0})
+            sotcksData.append({
+                "code":id[id.find('_')+1:], 
+                "name":"--", 
+                "price":0, 
+                "o":"--", 
+                "h":"--", 
+                "l":"--",  
+                "v":"--", 
+                "y":"--", 
+                "z":"--", 
+                "pfp":0})
     '''
     print("<hr>")
     print(targets)
@@ -162,7 +182,7 @@ try:
 except Exception as e:
     sotcksData = []
     for id in targets:
-        sotcksData.append({"code":id, "name":"--", "price":0, "pfp":0})
+        sotcksData.append({"code":id[id.find('_')+1:], "name":"--", "price":0, "pfp":0})
     error_class = e.__class__.__name__ #取得錯誤類型
     detail = e.args[0] #取得詳細內容
     cl, exc, tb = sys.exc_info() #取得Call Stack
