@@ -175,7 +175,7 @@ try:
     #jsonData = json.dumps(sotcksData)
     result = {"Success":True,"Msg":"", "timestamp":utility.timestamp_milli(), "Data":sotcksData}
     jsonData = json.dumps(result)
-    print ("Content-type:text/json")
+    print ("Content-type:application/json;charset=UTF-8")
     print ("Access-Control-Allow-Origin: *")
     print ("") # 要 Access-Control-Allow-Origin: * 一定要這樣的輸出各式
     print (jsonData)
@@ -195,7 +195,7 @@ except Exception as e:
 
     result = {"Success":False,"Msg":"An Error occurred:{}".format(errMsg), "timestamp":utility.timestamp_milli(), "Data":sotcksData, "query_url":query_url}
     jsonData = json.dumps(result)
-    print ("Content-type:text/json")
+    print ("Content-type:application/json;charset=UTF-8")
     print ("Access-Control-Allow-Origin: *")
     print ("") # 要 Access-Control-Allow-Origin: * 一定要這樣的輸出格式、順序
     print (jsonData)
