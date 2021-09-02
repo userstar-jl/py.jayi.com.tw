@@ -89,6 +89,39 @@ def is_time_between(time, time_range):
         return time >= time_range[0] or time <= time_range[1]
     return time_range[0] <= time <= time_range[1]
 
+def get_stock_price_db(stocks):
+    sql_command = "select * from daily_stock_quotes where Code IN (%s);"
+    format_strings = ','.join(['%s'] * len(stocks))
+    try:
+        # 建立Connection物件
+        conn = pymysql.connect(**db_settings)
+        # 建立Cursor物件
+        with conn.cursor() as cursor:
+            # 執行指令
+            number_of_rows = cursor.execute(sql_command % format_strings,
+                tuple(stocks))
+            field_names = [i[0] for i in cursor.description]
+            # 取得所有資料
+            result_set = cursor.fetchall()
+            if number_of_rows!=0:
+                result = {"Result":True,"Msg":result_set, "timestamp":timestamp_milli()}
+                # return json.dumps(result)
+            else:
+                result = {"Result":False,"Msg":sql_command, "timestamp":timestamp_milli()}
+
+            # return json.dumps(result)
+    except Exception as e:
+        error_class = e.__class__.__name__ #取得錯誤類型
+        detail = e.args[0] #取得詳細內容
+        cl, exc, tb = sys.exc_info() #取得Call Stack
+        lastCallStack = traceback.extract_tb(tb)[-1] #取得Call Stack的最後一筆資料
+        fileName = lastCallStack[0] #取得發生的檔案名稱
+        lineNum = lastCallStack[1] #取得發生的行號
+        funcName = lastCallStack[2] #取得發生的函數名稱
+        errMsg = "File \"{}\", line {}, in {}: [{}] {}".format(fileName, lineNum, funcName, error_class, detail)
+        result = {"Result":False,"Msg":"An Error occurred:{}".format(errMsg), "timestamp":timestamp_milli()}
+    return result
+
 def get_stock_price(dataDate, stocks):
     targets = stocks.split(',')
     filePath = "/mnt/yau/stock_sys/data/ExchangeReport/DailyExchangeReport_"+ dataDate +".csv"
@@ -145,11 +178,15 @@ def getTradingTimeStatus(require_date=None, require_time=None, writeToDB=False):
 #     date_open_or_not = getDateOpenOrNot(require_date)
 #     return {"TreadingTimeStatus": trading_time_status}
 
-# 取得查詢日期的前一個交易日
-def getLastTradingDay(requestDateString):
-    requestDate = datetime.strptime(requestDateString, "%Y%m%d")
+# 取得查詢日期的前一個交易日,if requestDateString==None 則取得最近的交易日(包含今天)
+def getLastTradingDay(requestDateString=None):
+    if(requestDateString==None):
+        requestDate = datetime.today()
+        index = 0
+    else:
+        requestDate = datetime.strptime(requestDateString, "%Y%m%d")
+        index = 1
     got = False
-    index = 1
     while not got:
         tmpDate = (requestDate + timedelta(-index)).strftime("%Y%m%d")
         #檢查是否有開示
@@ -175,12 +212,16 @@ if __name__ == '__main__':
     # date_time_str = '2021-04-23 08:15:27.243860'
     # date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S.%f')
     # print(getDateType(date_time_obj, 1))
-    # print(getDateOpenOrNot(require_date='20210614', isJson=True))
+    # print(getDateOpenOrNot(require_date='20210614', isMore=True))
     # print(getDateOpenOrNot())
     # print(getTradingTimeType('20210611', '002930'))
     # print(getTradingTimeStatus())
-    getTradingTimeStatus(require_date='20210614',require_time='0910',writeToDB=True)
+    # getTradingTimeStatus(require_date='20210614',require_time='0910',writeToDB=True)
     # sendTelegramBot(message="QQQ")
     # print(getLastTradingDay('20210615'))
     # print(getNowOpenOrNot())
     # print(get_stock_price('20210611', '1442,2337,8069,2330'))
+    print(get_stock_price_db(['2330','2337']))
+    print("------")
+    print(get_stock_price_db([2330,2337]))
+    print("END")
